@@ -1,4 +1,4 @@
-package tourGuide;
+package tourGuide.integration;
 
 import gpsUtil.GpsUtil;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
-public class TestUserService {
+public class TestUserServiceIT {
     @Autowired
     UserService userService;
     @MockBean
