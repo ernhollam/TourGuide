@@ -7,7 +7,7 @@ import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import rewardCentral.RewardCentral;
-import tourGuide.constants.Constants;
+import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public class RewardsService implements IRewardsService {
 
     // proximity in miles
-    private int proximityBuffer = Constants.DEFAULT_PROXIMITY_BUFFER;
+    private int proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
 
@@ -32,7 +32,7 @@ public class RewardsService implements IRewardsService {
     }
 
     public void setDefaultProximityBuffer() {
-        proximityBuffer = Constants.DEFAULT_PROXIMITY_BUFFER;
+        proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     }
 
     public void calculateRewards(User user) {
@@ -77,7 +77,7 @@ public class RewardsService implements IRewardsService {
                 + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));
 
         double nauticalMiles = 60 * Math.toDegrees(angle);
-        return Constants.STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
+        return TourGuideConstants.STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
     }
 
 }

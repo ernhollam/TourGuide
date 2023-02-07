@@ -6,6 +6,7 @@ import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
 import tourGuide.tracker.Tracker;
@@ -56,7 +57,7 @@ public class TourGuideService implements ITourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
-        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
+        List<Provider> providers = tripPricer.getPrice(TourGuideConstants.TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
                 user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
@@ -84,12 +85,6 @@ public class TourGuideService implements ITourGuideService {
         Runtime.getRuntime().addShutdownHook(new Thread(tracker::stopTracking));
     }
 
-    /**********************************************************************************
-     *
-     * Methods Below: For Internal Testing
-     *
-     **********************************************************************************/
-    private static final String tripPricerApiKey = "test-server-api-key";
 
 
 }

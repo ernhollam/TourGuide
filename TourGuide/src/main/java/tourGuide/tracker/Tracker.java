@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import tourGuide.constants.Constants;
+import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
 import tourGuide.service.ITourGuideService;
 import tourGuide.service.IUserService;
@@ -56,7 +56,7 @@ public class Tracker extends Thread {
 			stopWatch.reset();
 			try {
 				log.debug("Tracker sleeping");
-				TimeUnit.SECONDS.sleep(Constants.TRACKING_POLLING_INTERVAL);
+				TimeUnit.SECONDS.sleep(TourGuideConstants.TRACKING_POLLING_INTERVAL);
 			} catch (InterruptedException e) {
 				break;
 			}
