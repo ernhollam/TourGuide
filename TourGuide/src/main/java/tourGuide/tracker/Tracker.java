@@ -1,27 +1,32 @@
 package tourGuide.tracker;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import tourGuide.constants.Constants;
+import tourGuide.model.User;
+import tourGuide.service.ITourGuideService;
+import tourGuide.service.IUserService;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import tourGuide.service.TourGuideService;
-import tourGuide.model.User;
-
+@Component
+@Slf4j
 public class Tracker extends Thread {
-	private Logger logger = LoggerFactory.getLogger(Tracker.class);
-	private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
+
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-	private final TourGuideService tourGuideService;
+	@Autowired
+	private final ITourGuideService tourGuideService;
+	@Autowired final IUserService userService;
 	private boolean stop = false;
 
-	public Tracker(TourGuideService tourGuideService) {
+	public Tracker(ITourGuideService tourGuideService, IUserService userService) {
 		this.tourGuideService = tourGuideService;
-		
+		this.userService = userService;
 		executorService.submit(this);
 	}
 	
@@ -38,20 +43,20 @@ public class Tracker extends Thread {
 		StopWatch stopWatch = new StopWatch();
 		while(true) {
 			if(Thread.currentThread().isInterrupted() || stop) {
-				logger.debug("Tracker stopping");
+				log.debug("Tracker stopping");
 				break;
 			}
 			
-			List<User> users = tourGuideService.getAllUsers();
-			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
+			List<User> users = userService.getAllUsers();
+			log.debug("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
-			users.forEach(u -> tourGuideService.trackUserLocation(u));
+			users.forEach(tourGuideService::trackUserLocation);
 			stopWatch.stop();
-			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds."); 
+			log.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds."); 
 			stopWatch.reset();
 			try {
-				logger.debug("Tracker sleeping");
-				TimeUnit.SECONDS.sleep(trackingPollingInterval);
+				log.debug("Tracker sleeping");
+				TimeUnit.SECONDS.sleep(Constants.TRACKING_POLLING_INTERVAL);
 			} catch (InterruptedException e) {
 				break;
 			}

@@ -1,24 +1,26 @@
 package tourGuide.controller;
 
-import java.util.List;
-
+import com.jsoniter.output.JsonStream;
+import gpsUtil.location.VisitedLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.jsoniter.output.JsonStream;
-
-import gpsUtil.location.VisitedLocation;
-import tourGuide.service.TourGuideService;
 import tourGuide.model.User;
+import tourGuide.service.ITourGuideService;
+import tourGuide.service.IUserService;
 import tripPricer.Provider;
+
+import java.util.List;
 
 @RestController
 public class TourGuideController {
 
 	@Autowired
-	TourGuideService tourGuideService;
+    ITourGuideService tourGuideService;
+
+    @Autowired
+    IUserService userService;
 	
     @RequestMapping("/")
     public String index() {
@@ -73,7 +75,7 @@ public class TourGuideController {
     }
     
     private User getUser(String userName) {
-    	return tourGuideService.getUser(userName);
+    	return userService.getUser(userName);
     }
    
 
