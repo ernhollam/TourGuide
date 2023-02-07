@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class TestUserServiceIT {
     @Autowired
-    UserService userService;
+    UserService    userService;
     @MockBean
-    GpsUtil gpsUtil;
+    GpsUtil        gpsUtil;
     @MockBean
     RewardsService rewardsService;
     @BeforeAll
@@ -34,7 +34,7 @@ public class TestUserServiceIT {
     @Test
     public void getAllUsers() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user  = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
         userService.addUser(user);
@@ -42,7 +42,7 @@ public class TestUserServiceIT {
 
         List<User> allUsers = userService.getAllUsers();
 
-       // userService.tracker.stopTracking();
+        // userService.tracker.stopTracking();
 
         assertTrue(allUsers.contains(user));
         assertTrue(allUsers.contains(user2));
@@ -51,13 +51,13 @@ public class TestUserServiceIT {
     @Test
     public void addUser() {
 
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        User user  = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         User user2 = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
 
         userService.addUser(user);
         userService.addUser(user2);
 
-        User retrievedUser = userService.getUser(user.getUserName());
+        User retrievedUser  = userService.getUser(user.getUserName());
         User retrievedUser2 = userService.getUser(user2.getUserName());
 
         //userService.tracker.stopTracking();

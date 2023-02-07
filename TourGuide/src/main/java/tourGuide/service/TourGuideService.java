@@ -19,9 +19,9 @@ import java.util.List;
 @Service
 @Slf4j
 public class TourGuideService implements ITourGuideService {
-    private final GpsUtil gpsUtil;
+    private final GpsUtil    gpsUtil;
     private final TripPricer tripPricer = new TripPricer();
-    public final Tracker tracker;
+    public final  Tracker    tracker;
     boolean testMode = true;
     @Autowired
     private final IRewardsService rewardsService;
@@ -30,9 +30,9 @@ public class TourGuideService implements ITourGuideService {
     private final IUserService userService;
 
     public TourGuideService(GpsUtil gpsUtil, IRewardsService rewardsService, IUserService userService) {
-        this.gpsUtil = gpsUtil;
+        this.gpsUtil        = gpsUtil;
         this.rewardsService = rewardsService;
-        this.userService = userService;
+        this.userService    = userService;
 
         if (testMode) {
             log.info("TestMode enabled");
@@ -50,8 +50,8 @@ public class TourGuideService implements ITourGuideService {
 
     public VisitedLocation getUserLocation(User user) {
         return (user.getVisitedLocations().size() > 0) ?
-                user.getLastVisitedLocation() :
-                trackUserLocation(user);
+               user.getLastVisitedLocation() :
+               trackUserLocation(user);
     }
 
 
@@ -84,7 +84,6 @@ public class TourGuideService implements ITourGuideService {
     private void addShutDownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(tracker::stopTracking));
     }
-
 
 
 }

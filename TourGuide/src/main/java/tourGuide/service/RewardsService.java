@@ -18,12 +18,12 @@ import java.util.List;
 public class RewardsService implements IRewardsService {
 
     // proximity in miles
-    private int proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
-    private final GpsUtil gpsUtil;
+    private       int           proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
+    private final GpsUtil       gpsUtil;
     private final RewardCentral rewardsCentral;
 
     public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
-        this.gpsUtil = gpsUtil;
+        this.gpsUtil        = gpsUtil;
         this.rewardsCentral = rewardCentral;
     }
 
@@ -37,7 +37,7 @@ public class RewardsService implements IRewardsService {
 
     public void calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtil.getAttractions();
+        List<Attraction>      attractions   = gpsUtil.getAttractions();
 
         for (VisitedLocation visitedLocation : userLocations) {
             for (Attraction attraction : attractions) {

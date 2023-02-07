@@ -31,16 +31,15 @@ public class UserService implements IUserService {
     public void initializeInternalUsers() {
         IntStream.range(0, InternalTestHelper.getInternalUserNumber()).forEach(i -> {
             String userName = "internalUser" + i;
-            String phone = "000";
-            String email = userName + "@tourGuide.com";
-            User user = new User(UUID.randomUUID(), userName, phone, email);
+            String phone    = "000";
+            String email    = userName + "@tourGuide.com";
+            User   user     = new User(UUID.randomUUID(), userName, phone, email);
             LocationUtil.generateUserLocationHistory(user);
 
             internalUserMap.put(userName, user);
         });
         log.debug("Created " + InternalTestHelper.getInternalUserNumber() + " internal test users.");
     }
-
 
 
 }
