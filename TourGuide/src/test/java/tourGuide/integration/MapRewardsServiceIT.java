@@ -12,9 +12,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
-import tourGuide.service.IRewardsService;
-import tourGuide.service.IUserService;
-import tourGuide.service.TourGuideService;
+import tourGuide.service.RewardsService;
+import tourGuide.service.UserService;
+import tourGuide.service.MapTourGuideService;
+import tourGuide.service.TrackerService;
 
 import java.util.Date;
 import java.util.List;
@@ -26,14 +27,16 @@ import static org.junit.Assert.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class RewardsServiceIT {
+public class MapRewardsServiceIT {
 
     @Autowired
-    private IRewardsService  rewardsService;
+    private RewardsService      rewardsService;
     @Autowired
-    private TourGuideService tourGuideService;
+    private MapTourGuideService mapTourGuideService;
     @Autowired
-    private IUserService     userService;
+    private TrackerService trackerService;
+    @Autowired
+    private UserService    userService;
 
     private final GpsUtil gpsUtil = new GpsUtil();
 
@@ -44,9 +47,9 @@ public class RewardsServiceIT {
 
         Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-        tourGuideService.trackUserLocation(user);
+        mapTourGuideService.trackUserLocation(user);
         List<UserReward> userRewards = user.getUserRewards();
-        tourGuideService.tracker.stopTracking();
+        trackerService.stopTracking();
         assertEquals(1, userRewards.size());
     }
 
@@ -64,8 +67,8 @@ public class RewardsServiceIT {
         InternalTestHelper.setInternalUserNumber(1);
 
         rewardsService.calculateRewards(userService.getAllUsers().get(0));
-        List<UserReward> userRewards = tourGuideService.getUserRewards(userService.getAllUsers().get(0));
-        tourGuideService.tracker.stopTracking();
+        List<UserReward> userRewards = mapTourGuideService.getUserRewards(userService.getAllUsers().get(0));
+        trackerService.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
     }

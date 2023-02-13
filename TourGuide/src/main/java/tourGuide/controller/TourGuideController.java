@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tourGuide.model.User;
-import tourGuide.service.ITourGuideService;
-import tourGuide.service.IUserService;
+import tourGuide.service.TourGuideService;
+import tourGuide.service.UserService;
 import tripPricer.Provider;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import java.util.List;
 public class TourGuideController {
 
     @Autowired
-    ITourGuideService tourGuideService;
+    TourGuideService tourGuideService;
 
     @Autowired
-    IUserService userService;
+    UserService userService;
 
     @RequestMapping("/")
     public String index() {

@@ -2,33 +2,26 @@ package tourGuide.tracker;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
-import tourGuide.service.ITourGuideService;
-import tourGuide.service.IUserService;
+import tourGuide.service.TourGuideService;
+import tourGuide.service.UserService;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@Component
+
 @Slf4j
 public class Tracker extends Thread {
 
-    private final ExecutorService   executorService = Executors.newSingleThreadExecutor();
-    @Autowired
-    private final ITourGuideService tourGuideService;
-    @Autowired
-    final         IUserService      userService;
-    private       boolean           stop            = false;
+    private final TourGuideService tourGuideService;
 
-    public Tracker(ITourGuideService tourGuideService, IUserService userService) {
+    final   UserService userService;
+    private boolean     stop            = false;
+
+    public Tracker(TourGuideService tourGuideService, UserService userService) {
         this.tourGuideService = tourGuideService;
         this.userService      = userService;
-        executorService.submit(this);
     }
 
     /**
@@ -36,7 +29,6 @@ public class Tracker extends Thread {
      */
     public void stopTracking() {
         stop = true;
-        executorService.shutdownNow();
     }
 
     @Override

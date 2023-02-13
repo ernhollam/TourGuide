@@ -1,45 +1,32 @@
 package tourGuide.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
-import tourGuide.util.LocationUtil;
 
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.List;
 
-@Service
-@Slf4j
-public class UserService implements IUserService {
-    // Database connection will be used for external users, but for testing purposes internal users are provided and stored in memory
-    private final Map<String, User> internalUserMap = new HashMap<>();
-    public User getUser(String userName) {
-        return internalUserMap.get(userName);
-    }
+public interface UserService {
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(internalUserMap.values());
-    }
+    /**
+     * Gets user with username.
+     * @param userName username of user to find
+     * @return a user if exists
+     */
+    User getUser(String userName);
 
-    public void addUser(User user) {
-        if (!internalUserMap.containsKey(user.getUserName())) {
-            internalUserMap.put(user.getUserName(), user);
-        }
-    }
+    /**
+     * Returns a list of all users.
+     * @return list of all users.
+     */
+    List<User> getAllUsers();
 
-    public void initializeInternalUsers() {
-        IntStream.range(0, InternalTestHelper.getInternalUserNumber()).forEach(i -> {
-            String userName = "internalUser" + i;
-            String phone    = "000";
-            String email    = userName + "@tourGuide.com";
-            User   user     = new User(UUID.randomUUID(), userName, phone, email);
-            LocationUtil.generateUserLocationHistory(user);
+    /**
+     * Adds new user to the app.
+     * @param user user to add
+     */
+    void addUser(User user);
 
-            internalUserMap.put(userName, user);
-        });
-        log.debug("Created " + InternalTestHelper.getInternalUserNumber() + " internal test users.");
-    }
-
-
+    /**
+     * Creates test users.
+     */
+    void initializeInternalUsers();
 }
