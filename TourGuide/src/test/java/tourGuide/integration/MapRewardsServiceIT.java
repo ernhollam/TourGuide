@@ -3,6 +3,7 @@ package tourGuide.integration;
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,11 +27,14 @@ public class MapRewardsServiceIT {
     TourGuideService mapTourGuideService;
     TrackerService   trackerService;
 
+    @Before
+    public void setServices(){
+        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
+        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
+    }
 
     @Test
     public void userGetRewards() {
-        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
         //Start tracker and reset number of users
         trackerService = new TrackerService(mapTourGuideService, new MapUserService());
         InternalTestHelper.setInternalUserNumber(0);
@@ -48,16 +52,12 @@ public class MapRewardsServiceIT {
 
     @Test
     public void isWithinAttractionProximity() {
-        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
         Attraction attraction = gpsUtil.getAttractions().get(0);
         assertTrue(mapRewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
     @Test
     public void nearAllAttractions() {
-        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
         // GIVEN a test user and setting proximity to maximal value
         InternalTestHelper.setInternalUserNumber(1);
         UserService userService = new MapUserService();
