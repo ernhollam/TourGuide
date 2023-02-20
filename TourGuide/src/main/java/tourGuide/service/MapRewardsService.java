@@ -55,8 +55,7 @@ public class MapRewardsService implements RewardsService {
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
-        int attractionProximityRange = 200;
-        return !(getDistance(attraction, location) > attractionProximityRange);
+        return (getDistance(attraction, location) <= TourGuideConstants.ATTRACTION_PROXIMITY_RANGE);
     }
 
     private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
