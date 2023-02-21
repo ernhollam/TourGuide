@@ -4,6 +4,7 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
+import tourGuide.model.ViewModel.NearbyAttractionViewModel;
 import tripPricer.Provider;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface TourGuideService {
     VisitedLocation getUserLocation(User user);
     List<Provider> getTripDeals(User user);
     VisitedLocation trackUserLocation(User user);
-    List<Attraction> getNearByAttractions(VisitedLocation visitedLocation);
+    List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation);
+    List<NearbyAttractionViewModel> getNearByAttractions(User user);
 }

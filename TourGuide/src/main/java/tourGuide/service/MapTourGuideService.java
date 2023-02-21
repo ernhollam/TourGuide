@@ -8,14 +8,15 @@ import org.springframework.stereotype.Service;
 import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
+import tourGuide.model.ViewModel.NearbyAttractionViewModel;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -57,34 +58,32 @@ public class MapTourGuideService implements TourGuideService {
         return visitedLocation;
     }
 
-    public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
+    public List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation) {
         List<Attraction> nearbyAttractions = new ArrayList<>();
         for (Attraction attraction : gpsUtil.getAttractions()) {
             if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
                 nearbyAttractions.add(attraction);
             }
         }
-
         return nearbyAttractions;
     }
 
-    public Map<String, Map<String, String>> getFiveClosestAttractions(User user) {
-        VisitedLocation     lastVisitedLocation = getUserLocation(user);
-        Map<String, Double> distanceToUser      = new HashMap<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
-            distanceToUser.put(attraction.attractionName, rewardsService.getDistance(lastVisitedLocation.location, attraction));
+    public List<NearbyAttractionViewModel> getNearByAttractions(User user) {
+        VisitedLocation lastVisitedLocation = getUserLocation(user);
+        List<Attraction> closestAttractions = gpsUtil.getAttractions()
+                .stream()
+                .sorted(Comparator.comparingDouble(attraction -> rewardsService.getDistance(lastVisitedLocation.location, attraction)))
+                .limit(TourGuideConstants.NUMBER_OF_NEARBY_ATTRACTIONS)
+                .collect(Collectors.toList());
+
+        List<NearbyAttractionViewModel> nearbyAttractions = new CopyOnWriteArrayList<>();
+        for (Attraction attraction : closestAttractions) {
+            nearbyAttractions.add(new NearbyAttractionViewModel(attraction.attractionName,
+                    attraction,
+                    lastVisitedLocation.location,
+                    rewardsService.getDistance(lastVisitedLocation.location, attraction),
+                    rewardsService.getRewardPoints(attraction, user)));
         }
-        Stream<Map.Entry<String, Double>> sortedListOfAttractionsByDistance =
-                distanceToUser
-                        .entrySet()
-                        .stream()
-                        .sorted(Map.Entry.comparingByValue())
-                        .limit(5);
-        //TODO remettre les infos demandées dans la map et retourner la bonne Map
-        return null;
+        return nearbyAttractions;
     }
-
-
-
-
 }
