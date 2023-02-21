@@ -62,7 +62,7 @@ public class MapRewardsService implements RewardsService {
         return !(getDistance(attraction, visitedLocation.location) > proximityBuffer);
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
+    public int getRewardPoints(Attraction attraction, User user) {
         return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
     }
 
