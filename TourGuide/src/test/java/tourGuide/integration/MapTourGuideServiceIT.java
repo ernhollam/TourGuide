@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rewardCentral.RewardCentral;
+import tourGuide.config.TestModeConfiguration;
 import tourGuide.constants.TourGuideConstants;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
@@ -31,6 +32,7 @@ public class MapTourGuideServiceIT {
     RewardsService mapRewardsService;
     TrackerService trackerService;
     private final GpsUtil gpsUtil = new GpsUtil();
+    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
 
     User            user;
     VisitedLocation visitedLocation;
@@ -44,7 +46,7 @@ public class MapTourGuideServiceIT {
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
 
-        UserService userService = new MapUserService();
+        UserService userService = new MapUserService(testModeConfiguration);
         trackerService = new TrackerService(mapTourGuideService, userService);
         // create test user and add one visited location
         user            = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");

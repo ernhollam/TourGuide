@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import rewardCentral.RewardCentral;
+import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
@@ -22,13 +23,14 @@ import static org.junit.Assert.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 public class MapRewardsServiceIT {
-    private final GpsUtil gpsUtil = new GpsUtil();
+    private final GpsUtil               gpsUtil               = new GpsUtil();
+    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     RewardsService   mapRewardsService;
     TourGuideService mapTourGuideService;
     TrackerService   trackerService;
 
     @Before
-    public void setServices(){
+    public void setServices() {
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
     }
@@ -36,7 +38,7 @@ public class MapRewardsServiceIT {
     @Test
     public void userGetRewards() {
         //Start tracker and reset number of users
-        trackerService = new TrackerService(mapTourGuideService, new MapUserService());
+        trackerService = new TrackerService(mapTourGuideService, new MapUserService(testModeConfiguration));
         InternalTestHelper.setInternalUserNumber(0);
         // create new user
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -60,7 +62,7 @@ public class MapRewardsServiceIT {
     public void nearAllAttractions() {
         // GIVEN a test user and setting proximity to maximal value
         InternalTestHelper.setInternalUserNumber(1);
-        UserService userService = new MapUserService();
+        UserService userService = new MapUserService(testModeConfiguration);
         trackerService = new TrackerService(mapTourGuideService, userService);
         mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
         // WHEN calculating the rewards for the test user
