@@ -86,7 +86,7 @@ public class MapTourGuideServiceIT {
         List<Provider> providers = mapTourGuideService.getTripDeals(user);
         trackerService.stopTracking();
 
-        assertEquals(10, providers.size());
+        assertEquals(5, providers.size());
     }
 
 

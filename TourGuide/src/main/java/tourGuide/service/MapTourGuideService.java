@@ -4,6 +4,7 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
+import org.javamoney.moneta.Money;
 import org.springframework.stereotype.Service;
 import tourGuide.constants.TourGuideConstants;
 import tourGuide.model.User;
@@ -45,10 +46,22 @@ public class MapTourGuideService implements TourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
-        List<Provider> providers = tripPricer.getPrice(TourGuideConstants.TRIP_PRICER_API_KEY, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
-                user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulativeRewardPoints);
-        user.setTripDeals(providers);
-        return providers;
+        // get list of providers based on user preferences regarding nb of adults, nb of children and trip duration
+        List<Provider> providers = tripPricer.getPrice(TourGuideConstants.TRIP_PRICER_API_KEY, user.getUserId(),
+                user.getUserPreferences().getNumberOfAdults(),
+                user.getUserPreferences().getNumberOfChildren(),
+                user.getUserPreferences().getTripDuration(),
+                cumulativeRewardPoints);
+        // find trip deals within user's price range
+        Money userLowerPricePoint  = user.getUserPreferences().getLowerPricePoint();
+        Money userHigherPricePoint = user.getUserPreferences().getHighPricePoint();
+        List<Provider> providersWithinUsersPriceRange = providers
+                .stream()
+                .filter(provider -> Money.of(provider.price, user.getUserPreferences().getCurrency()).isGreaterThanOrEqualTo(userLowerPricePoint)
+                        && Money.of(provider.price, user.getUserPreferences().getCurrency()).isLessThanOrEqualTo(userHigherPricePoint))
+                .collect(Collectors.toList());
+        user.setTripDeals(providersWithinUsersPriceRange);
+        return providersWithinUsersPriceRange;
     }
 
     public VisitedLocation trackUserLocation(User user) {
