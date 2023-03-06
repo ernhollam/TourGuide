@@ -1,6 +1,7 @@
 package tourGuide.integration;
 
 import gpsUtil.GpsUtil;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import tourGuide.service.*;
 import tripPricer.Provider;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -99,5 +101,13 @@ public class MapTourGuideServiceIT {
         assertEquals(5, providers.size());
     }
 
-
+    @Test
+    public void getAllCurrentLocations() {
+        // GIVEN two users
+        // WHEN calling getAllCurrentLocations()
+        Map<User, Location> result = mapTourGuideService.getAllCurrentLocations();
+        // THEN result must contain a map with two users and their locations
+        assertEquals(user.getLastVisitedLocation().location, result.get(user));
+        assertEquals(user2.getLastVisitedLocation().location, result.get(user2));
+    }
 }

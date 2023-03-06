@@ -2,6 +2,7 @@ package tourGuide.service;
 
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.javamoney.moneta.Money;
@@ -16,6 +17,8 @@ import tripPricer.TripPricer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -26,11 +29,13 @@ public class MapTourGuideService implements TourGuideService {
     private final TripPricer tripPricer = new TripPricer();
 
     private final RewardsService rewardsService;
+    private final UserService    userService;
 
 
-    public MapTourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
+    public MapTourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, UserService userService) {
         this.gpsUtil        = gpsUtil;
         this.rewardsService = rewardsService;
+        this.userService    = userService;
     }
 
     public List<UserReward> getUserRewards(User user) {
@@ -38,9 +43,7 @@ public class MapTourGuideService implements TourGuideService {
     }
 
     public VisitedLocation getUserLocation(User user) {
-        return (user.getVisitedLocations().size() > 0) ?
-               user.getLastVisitedLocation() :
-               trackUserLocation(user);
+        return (user.getVisitedLocations().isEmpty()) ? trackUserLocation(user) : user.getLastVisitedLocation();
     }
 
 
@@ -98,5 +101,14 @@ public class MapTourGuideService implements TourGuideService {
                     rewardsService.getRewardPoints(attraction, user)));
         }
         return nearbyAttractions;
+    }
+
+    public Map<User, Location> getAllCurrentLocations() {
+        List<User>          users            = userService.getAllUsers();
+        Map<User, Location> currentLocations = new ConcurrentHashMap<>();
+        for (User user : users) {
+            currentLocations.put(user, getUserLocation(user).location);
+        }
+        return currentLocations;
     }
 }
