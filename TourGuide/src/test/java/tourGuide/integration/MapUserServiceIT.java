@@ -2,10 +2,9 @@ package tourGuide.integration;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.runner.RunWith;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
@@ -15,11 +14,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
+@RunWith(SpringRunner.class)
+@Import(TestModeConfiguration.class)
 public class MapUserServiceIT {
 
     MapUserService userService;
@@ -40,7 +39,6 @@ public class MapUserServiceIT {
         userService.addUser(user2);
     }
     @Test
-    @DisplayName("getAllUsers() should return all existing users")
     public void getAllUsers() {
         //WHEN
         List<User> allUsers = userService.getAllUsers();
@@ -50,7 +48,6 @@ public class MapUserServiceIT {
     }
 
     @Test
-    @DisplayName("getUser should return the right user")
     public void getUser() {
         User retrievedUser  = userService.getUser(user.getUserName());
         User retrievedUser2 = userService.getUser(user2.getUserName());

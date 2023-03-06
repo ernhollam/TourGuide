@@ -4,8 +4,9 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.runner.RunWith;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
 import tourGuide.config.TestModeConfiguration;
 import tourGuide.constants.TourGuideConstants;
@@ -21,7 +22,8 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
+@Import(TestModeConfiguration.class)
 public class MapTourGuideServiceIT {
 
     /**
@@ -30,11 +32,13 @@ public class MapTourGuideServiceIT {
     TourGuideService mapTourGuideService;
 
     RewardsService mapRewardsService;
+    UserService    mapUserService;
     TrackerService trackerService;
-    private final GpsUtil gpsUtil = new GpsUtil();
+    private final GpsUtil               gpsUtil               = new GpsUtil();
     private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
 
     User            user;
+    User            user2;
     VisitedLocation visitedLocation;
 
 
@@ -44,13 +48,17 @@ public class MapTourGuideServiceIT {
         InternalTestHelper.setInternalUserNumber(0);
         // set up services
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
+        mapUserService      = new MapUserService(testModeConfiguration);
+        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
-        UserService userService = new MapUserService(testModeConfiguration);
-        trackerService = new TrackerService(mapTourGuideService, userService);
+        trackerService = new TrackerService(mapTourGuideService, mapUserService);
         // create test user and add one visited location
         user            = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+        user2           = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
         visitedLocation = mapTourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation2 = mapTourGuideService.trackUserLocation(user2);
+        mapUserService.addUser(user);
+        mapUserService.addUser(user2);
     }
 
     @Test

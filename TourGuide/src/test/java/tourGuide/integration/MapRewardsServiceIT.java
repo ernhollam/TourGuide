@@ -5,8 +5,10 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
 import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
@@ -21,24 +23,28 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
+@Import(TestModeConfiguration.class)
 public class MapRewardsServiceIT {
     private final GpsUtil               gpsUtil               = new GpsUtil();
-    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
+    @Autowired
+    private TestModeConfiguration testModeConfiguration;
     RewardsService   mapRewardsService;
+    UserService mapUserService;
     TourGuideService mapTourGuideService;
     TrackerService   trackerService;
 
     @Before
     public void setServices() {
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService);
+        mapUserService = new MapUserService(testModeConfiguration);
+        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
     }
 
     @Test
     public void userGetRewards() {
         //Start tracker and reset number of users
-        trackerService = new TrackerService(mapTourGuideService, new MapUserService(testModeConfiguration));
+        trackerService = new TrackerService(mapTourGuideService, mapUserService);
         InternalTestHelper.setInternalUserNumber(0);
         // create new user
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -62,12 +68,11 @@ public class MapRewardsServiceIT {
     public void nearAllAttractions() {
         // GIVEN a test user and setting proximity to maximal value
         InternalTestHelper.setInternalUserNumber(1);
-        UserService userService = new MapUserService(testModeConfiguration);
-        trackerService = new TrackerService(mapTourGuideService, userService);
+        trackerService = new TrackerService(mapTourGuideService, mapUserService);
         mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
         // WHEN calculating the rewards for the test user
-        mapRewardsService.calculateRewards(userService.getAllUsers().get(0));
-        List<UserReward> userRewards = mapTourGuideService.getUserRewards(userService.getAllUsers().get(0));
+        mapRewardsService.calculateRewards(mapUserService.getAllUsers().get(0));
+        List<UserReward> userRewards = mapTourGuideService.getUserRewards(mapUserService.getAllUsers().get(0));
         trackerService.stopTracking();
         //THEN user must have rewards for all attractions
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
