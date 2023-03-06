@@ -1,13 +1,14 @@
 package tourGuide.config;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@ConfigurationProperties(prefix = "com.tripmaster.tourguide")
+@PropertySource("application.properties")
 @Data
 public class TestModeConfiguration {
-    // TODO voir pourquoi l'externalisation ne fonctionne pas, c'est toujours à false même dans les tests
+    @Value("${com.tripmaster.tourguide.testmode}")
     private boolean testMode;
 }
