@@ -42,6 +42,7 @@ public class MapTourGuideServiceIT {
     User            user;
     User            user2;
     VisitedLocation visitedLocation;
+    VisitedLocation visitedLocation2;
 
 
     @Before
@@ -58,7 +59,7 @@ public class MapTourGuideServiceIT {
         user            = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         user2           = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
         visitedLocation = mapTourGuideService.trackUserLocation(user);
-        VisitedLocation visitedLocation2 = mapTourGuideService.trackUserLocation(user2);
+        visitedLocation2 = mapTourGuideService.trackUserLocation(user2);
         mapUserService.addUser(user);
         mapUserService.addUser(user2);
     }
@@ -105,9 +106,9 @@ public class MapTourGuideServiceIT {
     public void getAllCurrentLocations() {
         // GIVEN two users
         // WHEN calling getAllCurrentLocations()
-        Map<User, Location> result = mapTourGuideService.getAllCurrentLocations();
+        Map<UUID, Location> result = mapTourGuideService.getAllCurrentLocations();
         // THEN result must contain a map with two users and their locations
-        assertEquals(user.getLastVisitedLocation().location, result.get(user));
-        assertEquals(user2.getLastVisitedLocation().location, result.get(user2));
+        assertEquals(visitedLocation.location, result.get(user.getUserId()));
+        assertEquals(visitedLocation2.location, result.get(user2.getUserId()));
     }
 }
