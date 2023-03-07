@@ -6,17 +6,14 @@ import gpsUtil.location.VisitedLocation;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import rewardCentral.RewardCentral;
+import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
-import tourGuide.service.MapRewardsService;
-import tourGuide.service.MapTourGuideService;
-import tourGuide.service.TrackerService;
-import tourGuide.service.MapUserService;
+import tourGuide.service.*;
 
 import java.util.Date;
 import java.util.List;
@@ -24,9 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
 @RunWith(SpringRunner.class)
+@Import(TestModeConfiguration.class)
 public class PerformanceIT {
 
     /*
@@ -48,21 +44,26 @@ public class PerformanceIT {
      *     highVolumeGetRewards: 100,000 users within 20 minutes:
      *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
      */
-    @Autowired
-    private MapUserService      mapUserService;
-    @Autowired
-    private MapTourGuideService mapTourGuideService;
-    @Autowired
-    private MapRewardsService   mapRewardsService;
-    @Autowired
-    private TrackerService    trackerService;
+    TourGuideService mapTourGuideService;
+
+    RewardsService mapRewardsService;
+    UserService    mapUserService;
+    TrackerService trackerService;
     private final GpsUtil          gpsUtil = new GpsUtil();
     private       StopWatch        stopWatch;
+    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     @Before
     public void setUp() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(100);
         stopWatch = new StopWatch();
+
+        // set up services
+        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
+        mapUserService      = new MapUserService(testModeConfiguration);
+        mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
+
+        trackerService = new TrackerService(mapTourGuideService, mapUserService);
     }
     //@Ignore
     @Test
