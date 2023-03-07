@@ -14,10 +14,7 @@ import tourGuide.model.ViewModel.NearbyAttractionViewModel;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -38,15 +35,30 @@ public class MapTourGuideService implements TourGuideService {
         this.userService    = userService;
     }
 
+    /**
+     * Returns user rewards.
+     * @param user user to find rewards for
+     * @return list of user's rewards
+     */
     public List<UserReward> getUserRewards(User user) {
         return user.getUserRewards();
     }
 
+    /**
+     * Returns current location for a user
+     * @param user user for which the location is wanted
+     * @return user's last visited location or current location
+     */
     public VisitedLocation getUserLocation(User user) {
         return (user.getVisitedLocations().isEmpty()) ? trackUserLocation(user) : user.getLastVisitedLocation();
     }
 
 
+    /**
+     * Gets trip recommandations for user.
+     * @param user ser to find recommandations for
+     * @return a list of providers corresponding to user's preferences
+     */
     public List<Provider> getTripDeals(User user) {
         int cumulativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
         // get list of providers based on user preferences regarding nb of adults, nb of children and trip duration
@@ -84,6 +96,16 @@ public class MapTourGuideService implements TourGuideService {
         return nearbyAttractions;
     }
 
+    /**
+     * Get the closest tourist attractions to the user - no matter how far away they are.
+     *
+     * @return a list of objects that contain:
+     *     Name of Tourist attraction,
+     *     Tourist attractions lat/long,
+     *     The user's location lat/long,
+     *     The distance in miles between the user's location and each of the attractions.
+     *     The reward points for visiting each Attraction.
+     */
     public List<NearbyAttractionViewModel> getNearByAttractions(User user) {
         VisitedLocation lastVisitedLocation = getUserLocation(user);
         List<Attraction> closestAttractions = gpsUtil.getAttractions()
@@ -103,11 +125,15 @@ public class MapTourGuideService implements TourGuideService {
         return nearbyAttractions;
     }
 
-    public Map<User, Location> getAllCurrentLocations() {
+    /**
+     * Returns locations of all users currently using the app
+     * @return Map with user and their location
+     */
+    public Map<UUID, Location> getAllCurrentLocations() {
         List<User>          users            = userService.getAllUsers();
-        Map<User, Location> currentLocations = new ConcurrentHashMap<>();
+        Map<UUID, Location> currentLocations = new ConcurrentHashMap<>();
         for (User user : users) {
-            currentLocations.put(user, getUserLocation(user).location);
+            currentLocations.put(user.getUserId(), getUserLocation(user).location);
         }
         return currentLocations;
     }

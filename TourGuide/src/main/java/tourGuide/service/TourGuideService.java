@@ -10,6 +10,7 @@ import tripPricer.Provider;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface TourGuideService {
 
@@ -19,5 +20,5 @@ public interface TourGuideService {
     VisitedLocation trackUserLocation(User user);
     List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation);
     List<NearbyAttractionViewModel> getNearByAttractions(User user);
-    Map<User, Location> getAllCurrentLocations();
+    Map<UUID, Location> getAllCurrentLocations();
 }
