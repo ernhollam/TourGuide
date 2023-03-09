@@ -15,7 +15,6 @@ import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -131,7 +130,7 @@ public class MapTourGuideService implements TourGuideService {
      */
     public Map<UUID, Location> getAllCurrentLocations() {
         List<User>          users            = userService.getAllUsers();
-        Map<UUID, Location> currentLocations = new ConcurrentHashMap<>();
+        Map<UUID, Location> currentLocations = new HashMap<>();
         for (User user : users) {
             currentLocations.put(user.getUserId(), getUserLocation(user).location);
         }
