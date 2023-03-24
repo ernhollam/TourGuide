@@ -12,15 +12,18 @@ import tourGuide.model.User;
 import tourGuide.model.UserReward;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
 public class MapRewardsService implements RewardsService {
 
     // proximity in miles
-    private       int           proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
-    private final GpsUtil       gpsUtil;
-    private final RewardCentral rewardsCentral;
+    private       int             proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
+    private final GpsUtil         gpsUtil;
+    private final RewardCentral   rewardsCentral;
+    private       ExecutorService executorService = Executors.newCachedThreadPool();
 
     public MapRewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil        = gpsUtil;

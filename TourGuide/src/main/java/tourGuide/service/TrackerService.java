@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 @Service
 @Slf4j
 public class TrackerService {
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
     private final TourGuideService tourGuideService;
 

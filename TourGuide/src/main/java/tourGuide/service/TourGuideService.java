@@ -11,14 +11,15 @@ import tripPricer.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public interface TourGuideService {
 
     List<UserReward> getUserRewards(User user);
-    VisitedLocation getUserLocation(User user);
+    VisitedLocation getUserLocation(User user) throws ExecutionException, InterruptedException;
     List<Provider> getTripDeals(User user);
     VisitedLocation trackUserLocation(User user);
     List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation);
-    List<NearbyAttractionViewModel> getNearByAttractions(User user);
-    Map<UUID, Location> getAllCurrentLocations();
+    List<NearbyAttractionViewModel> getNearByAttractions(User user) throws ExecutionException, InterruptedException;
+    Map<UUID, Location> getAllCurrentLocations() throws ExecutionException, InterruptedException;
 }

@@ -20,6 +20,7 @@ import tripPricer.Provider;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -46,7 +47,7 @@ public class MapTourGuideServiceIT {
 
 
     @Before
-    public void setServices() {
+    public void setServices() throws ExecutionException, InterruptedException {
         // reset number of test users
         InternalTestHelper.setInternalUserNumber(0);
         // set up services
@@ -83,15 +84,15 @@ public class MapTourGuideServiceIT {
     }
     // @Ignore // Not yet implemented
     @Test
-    public void getNearByAttractions() {
+    public void getNearByAttractions() throws ExecutionException, InterruptedException {
         List<NearbyAttractionViewModel> nearByAttractions = mapTourGuideService.getNearByAttractions(user);
         trackerService.stopTracking();
 
         assertEquals(TourGuideConstants.NUMBER_OF_NEARBY_ATTRACTIONS, nearByAttractions.size());
-        assertTrue(nearByAttractions.get(0).getDistanceInMiles() <=nearByAttractions.get(1).getDistanceInMiles());
-        assertTrue(nearByAttractions.get(1).getDistanceInMiles() <=nearByAttractions.get(2).getDistanceInMiles());
-        assertTrue(nearByAttractions.get(2).getDistanceInMiles() <=nearByAttractions.get(3).getDistanceInMiles());
-        assertTrue(nearByAttractions.get(3).getDistanceInMiles() <=nearByAttractions.get(4).getDistanceInMiles());
+        assertTrue(nearByAttractions.get(0).getDistanceInMiles() <= nearByAttractions.get(1).getDistanceInMiles());
+        assertTrue(nearByAttractions.get(1).getDistanceInMiles() <= nearByAttractions.get(2).getDistanceInMiles());
+        assertTrue(nearByAttractions.get(2).getDistanceInMiles() <= nearByAttractions.get(3).getDistanceInMiles());
+        assertTrue(nearByAttractions.get(3).getDistanceInMiles() <= nearByAttractions.get(4).getDistanceInMiles());
     }
 
     @Test
@@ -103,7 +104,7 @@ public class MapTourGuideServiceIT {
     }
 
     @Test
-    public void getAllCurrentLocations() {
+    public void getAllCurrentLocations() throws ExecutionException, InterruptedException {
         // GIVEN two users
         // WHEN calling getAllCurrentLocations()
         Map<UUID, Location> result = mapTourGuideService.getAllCurrentLocations();

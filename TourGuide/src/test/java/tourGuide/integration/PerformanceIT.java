@@ -55,11 +55,12 @@ public class PerformanceIT {
     @Before
     public void setUp() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(100);
+        InternalTestHelper.setInternalUserNumber(1000);
         stopWatch = new StopWatch();
 
         // set up services
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
+        testModeConfiguration.setTestMode(true);
         mapUserService      = new MapUserService(testModeConfiguration);
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
@@ -90,7 +91,7 @@ public class PerformanceIT {
 
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers   = mapUserService.getAllUsers();
-        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
         allUsers.forEach(u -> mapRewardsService.calculateRewards(u));
 

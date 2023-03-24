@@ -15,8 +15,7 @@ import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,8 +24,9 @@ public class MapTourGuideService implements TourGuideService {
     private final GpsUtil    gpsUtil;
     private final TripPricer tripPricer = new TripPricer();
 
-    private final RewardsService rewardsService;
-    private final UserService    userService;
+    private final RewardsService  rewardsService;
+    private final UserService     userService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
 
     public MapTourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, UserService userService) {
@@ -37,7 +37,9 @@ public class MapTourGuideService implements TourGuideService {
 
     /**
      * Returns user rewards.
+     *
      * @param user user to find rewards for
+     *
      * @return list of user's rewards
      */
     public List<UserReward> getUserRewards(User user) {
@@ -46,7 +48,9 @@ public class MapTourGuideService implements TourGuideService {
 
     /**
      * Returns current location for a user
+     *
      * @param user user for which the location is wanted
+     *
      * @return user's last visited location or current location
      */
     public VisitedLocation getUserLocation(User user) {
@@ -56,7 +60,9 @@ public class MapTourGuideService implements TourGuideService {
 
     /**
      * Gets trip recommandations for user.
+     *
      * @param user ser to find recommandations for
+     *
      * @return a list of providers corresponding to user's preferences
      */
     public List<Provider> getTripDeals(User user) {
@@ -80,10 +86,23 @@ public class MapTourGuideService implements TourGuideService {
     }
 
     public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+        /*CompletableFuture<VisitedLocation> visitedLocation = CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()));
+        CompletableFuture<User> userFuture = visitedLocation.thenCompose(visitedLocation -> CompletableFuture.supplyAsync(() -> user.addToVisitedLocations(visitedLocation)));
+        CompletableFuture<VisitedLocation> visitedLocation = userFuture.thenCompose(result2 -> CompletableFuture.supplyAsync(() -> rewardsService.calculateRewards(userFuture)));*/
+        CompletableFuture<VisitedLocation> visitedLocationCompletableFuture =
+                CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()))
+                        .thenCompose(visitedLocation ->
+                                CompletableFuture.supplyAsync(() ->
+                                        {
+                                            user.addToVisitedLocations(visitedLocation);
+                                            rewardsService.calculateRewards(user);
+                                            return visitedLocation;
+                                        }
+                                ));
+        /*VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);
-        return visitedLocation;
+        rewardsService.calculateRewards(user);*/
+        return visitedLocationCompletableFuture.join();
     }
 
     public List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation) {
@@ -100,13 +119,13 @@ public class MapTourGuideService implements TourGuideService {
      * Get the closest tourist attractions to the user - no matter how far away they are.
      *
      * @return a list of objects that contain:
-     *     Name of Tourist attraction,
-     *     Tourist attractions lat/long,
-     *     The user's location lat/long,
-     *     The distance in miles between the user's location and each of the attractions.
-     *     The reward points for visiting each Attraction.
+     * Name of Tourist attraction,
+     * Tourist attractions lat/long,
+     * The user's location lat/long,
+     * The distance in miles between the user's location and each of the attractions.
+     * The reward points for visiting each Attraction.
      */
-    public List<NearbyAttractionViewModel> getNearByAttractions(User user) {
+    public List<NearbyAttractionViewModel> getNearByAttractions(User user) throws ExecutionException, InterruptedException {
         VisitedLocation lastVisitedLocation = getUserLocation(user);
         List<Attraction> closestAttractions = gpsUtil.getAttractions()
                 .stream()
@@ -127,9 +146,10 @@ public class MapTourGuideService implements TourGuideService {
 
     /**
      * Returns locations of all users currently using the app
+     *
      * @return Map with user and their location
      */
-    public Map<UUID, Location> getAllCurrentLocations() {
+    public Map<UUID, Location> getAllCurrentLocations() throws ExecutionException, InterruptedException {
         List<User>          users            = userService.getAllUsers();
         Map<UUID, Location> currentLocations = new ConcurrentHashMap<>();
         for (User user : users) {

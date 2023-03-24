@@ -6,7 +6,6 @@ import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
@@ -19,6 +18,7 @@ import tourGuide.service.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,22 +27,21 @@ import static org.junit.Assert.assertTrue;
 @Import(TestModeConfiguration.class)
 public class MapRewardsServiceIT {
     private final GpsUtil               gpsUtil               = new GpsUtil();
-    @Autowired
-    private TestModeConfiguration testModeConfiguration;
+    private       TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     RewardsService   mapRewardsService;
-    UserService mapUserService;
+    UserService      mapUserService;
     TourGuideService mapTourGuideService;
     TrackerService   trackerService;
 
     @Before
     public void setServices() {
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapUserService = new MapUserService(testModeConfiguration);
+        mapUserService      = new MapUserService(testModeConfiguration);
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
     }
 
     @Test
-    public void userGetRewards() {
+    public void userGetRewards() throws ExecutionException, InterruptedException {
         //Start tracker and reset number of users
         trackerService = new TrackerService(mapTourGuideService, mapUserService);
         InternalTestHelper.setInternalUserNumber(0);
@@ -65,13 +64,14 @@ public class MapRewardsServiceIT {
     }
 
     @Test
-    public void nearAllAttractions() {
+    public void nearAllAttractions() throws ExecutionException, InterruptedException {
         // GIVEN a test user and setting proximity to maximal value
         InternalTestHelper.setInternalUserNumber(1);
-        trackerService = new TrackerService(mapTourGuideService, mapUserService);
+        MapUserService nearAllAttractionsUserService = new MapUserService(testModeConfiguration);
+        trackerService = new TrackerService(mapTourGuideService, nearAllAttractionsUserService);
         mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
         // WHEN calculating the rewards for the test user
-        mapRewardsService.calculateRewards(mapUserService.getAllUsers().get(0));
+        mapRewardsService.calculateRewards(nearAllAttractionsUserService.getAllUsers().get(0));
         List<UserReward> userRewards = mapTourGuideService.getUserRewards(mapUserService.getAllUsers().get(0));
         trackerService.stopTracking();
         //THEN user must have rewards for all attractions

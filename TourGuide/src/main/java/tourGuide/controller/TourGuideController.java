@@ -12,6 +12,7 @@ import tourGuide.service.UserService;
 import tripPricer.Provider;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class TourGuideController {
@@ -33,7 +34,7 @@ public class TourGuideController {
      * @return user's location
      */
     @RequestMapping("/getLocation")
-    public String getLocation(@RequestParam String userName) {
+    public String getLocation(@RequestParam String userName) throws ExecutionException, InterruptedException {
         VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
         return JsonStream.serialize(visitedLocation.location);
     }
@@ -50,7 +51,7 @@ public class TourGuideController {
      */
 
     @RequestMapping("/getNearbyAttractions")
-    public String getNearbyAttractions(@RequestParam String userName) {
+    public String getNearbyAttractions(@RequestParam String userName) throws ExecutionException, InterruptedException {
         return JsonStream.serialize(tourGuideService.getNearByAttractions(getUser(userName)));
     }
 
@@ -69,7 +70,7 @@ public class TourGuideController {
      * @return Map with user and their location
      */
     @RequestMapping("/getAllCurrentLocations")
-    public String getAllCurrentLocations() {
+    public String getAllCurrentLocations() throws ExecutionException, InterruptedException {
         // TODO: Get a list of every user's most recent location as JSON
         //- Note: does not use gpsUtil to query for their current location,
         //        but rather gathers the user's current location from their stored location history.

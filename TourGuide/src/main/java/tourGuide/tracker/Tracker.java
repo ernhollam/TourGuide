@@ -17,7 +17,7 @@ public class Tracker extends Thread {
     private final TourGuideService tourGuideService;
 
     final   UserService userService;
-    private boolean     stop            = false;
+    private boolean     stop = false;
 
     public Tracker(TourGuideService tourGuideService, UserService userService) {
         this.tourGuideService = tourGuideService;
