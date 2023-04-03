@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 @Import(TestModeConfiguration.class)
 public class MapRewardsServiceIT {
     private final GpsUtil               gpsUtil               = new GpsUtil();
-    private       TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
+    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     RewardsService   mapRewardsService;
     UserService      mapUserService;
     TourGuideService mapTourGuideService;
@@ -50,7 +50,7 @@ public class MapRewardsServiceIT {
         // get first attraction in list and add its location to user's visited locations
         Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-        mapTourGuideService.trackUserLocation(user);
+        mapTourGuideService.trackUserLocation(user).get();
         List<UserReward> userRewards = user.getUserRewards();
         trackerService.stopTracking();
         // user must have the reward for the first attraction

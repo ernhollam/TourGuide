@@ -59,8 +59,8 @@ public class MapTourGuideServiceIT {
         // create test user and add one visited location
         user            = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         user2           = new User(UUID.randomUUID(), "jon2", "000", "jon2@tourGuide.com");
-        visitedLocation = mapTourGuideService.trackUserLocation(user);
-        visitedLocation2 = mapTourGuideService.trackUserLocation(user2);
+        visitedLocation = mapTourGuideService.trackUserLocation(user).get();
+        visitedLocation2 = mapTourGuideService.trackUserLocation(user2).get();
         mapUserService.addUser(user);
         mapUserService.addUser(user2);
     }

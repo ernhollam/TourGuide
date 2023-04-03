@@ -12,6 +12,8 @@ import tourGuide.model.User;
 import tourGuide.model.UserReward;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,7 +25,7 @@ public class MapRewardsService implements RewardsService {
     private       int             proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     private final GpsUtil         gpsUtil;
     private final RewardCentral   rewardsCentral;
-    private       ExecutorService executorService = Executors.newCachedThreadPool();
+    ExecutorService executorService = Executors.newFixedThreadPool(500);
 
     public MapRewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil        = gpsUtil;
@@ -38,23 +40,20 @@ public class MapRewardsService implements RewardsService {
         proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     }
 
-    public void calculateRewards(User user) {
+    public void calculateRewards(User user) throws ExecutionException, InterruptedException {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction>      attractions   = gpsUtil.getAttractions();
 
-        for (VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-                // if the user has never been to this attraction
-                if (user.getUserRewards()
-                        .stream().noneMatch(reward ->
-                                reward.attraction.attractionName.equals(attraction.attractionName))) {
+        CompletableFuture.runAsync(() -> {
+            for (VisitedLocation visitedLocation : userLocations) {
+                for (Attraction attraction : attractions) {
                     if (nearAttraction(visitedLocation, attraction)) {
                         // and is currently near this attraction, add the reward for this attraction to this user
                         user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
                     }
                 }
             }
-        }
+        }, executorService).get();
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

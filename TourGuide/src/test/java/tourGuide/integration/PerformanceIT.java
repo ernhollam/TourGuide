@@ -17,6 +17,7 @@ import tourGuide.service.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
@@ -49,17 +50,17 @@ public class PerformanceIT {
     RewardsService mapRewardsService;
     UserService    mapUserService;
     TrackerService trackerService;
-    private final GpsUtil          gpsUtil = new GpsUtil();
-    private       StopWatch        stopWatch;
+    private final GpsUtil               gpsUtil               = new GpsUtil();
+    private       StopWatch             stopWatch;
     private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     @Before
     public void setUp() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(1000);
+        InternalTestHelper.setInternalUserNumber(5000);
         stopWatch = new StopWatch();
 
         // set up services
-        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
+        mapRewardsService = new MapRewardsService(gpsUtil, new RewardCentral());
         testModeConfiguration.setTestMode(true);
         mapUserService      = new MapUserService(testModeConfiguration);
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
@@ -74,9 +75,14 @@ public class PerformanceIT {
 
         stopWatch.start();
 
-        for (User user : allUsers) {
-            mapTourGuideService.trackUserLocation(user);
-        }
+        allUsers.parallelStream().forEach((user) -> {
+            try {
+                mapTourGuideService.trackUserLocation(user).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         stopWatch.stop();
         trackerService.stopTracking();
 
@@ -89,12 +95,22 @@ public class PerformanceIT {
     public void highVolumeGetRewards() {
         stopWatch.start();
 
+        trackerService = new TrackerService(mapTourGuideService, mapUserService);
+        // add first attraction to all test users
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers   = mapUserService.getAllUsers();
         allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-        allUsers.forEach(u -> mapRewardsService.calculateRewards(u));
+        // use parallel stream to add rewards to users as it is used when calculateRewards is called
+        allUsers.parallelStream().forEach(user -> {
+            try {
+                mapRewardsService.calculateRewards(user);
+            } catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
+        // make sure each user is rewarded for visiting the attraction
         for (User user : allUsers) {
             assertTrue(user.getUserRewards().size() > 0);
         }

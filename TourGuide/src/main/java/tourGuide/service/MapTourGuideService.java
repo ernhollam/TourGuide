@@ -24,9 +24,9 @@ public class MapTourGuideService implements TourGuideService {
     private final GpsUtil    gpsUtil;
     private final TripPricer tripPricer = new TripPricer();
 
-    private final RewardsService  rewardsService;
+    private final RewardsService rewardsService;
     private final UserService     userService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(500);
 
 
     public MapTourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, UserService userService) {
@@ -53,8 +53,9 @@ public class MapTourGuideService implements TourGuideService {
      *
      * @return user's last visited location or current location
      */
-    public VisitedLocation getUserLocation(User user) {
-        return (user.getVisitedLocations().isEmpty()) ? trackUserLocation(user) : user.getLastVisitedLocation();
+    public VisitedLocation getUserLocation(User user) throws ExecutionException, InterruptedException {
+        return (user.getVisitedLocations().isEmpty()) ?
+               trackUserLocation(user).get() : user.getLastVisitedLocation();
     }
 
 
@@ -85,24 +86,20 @@ public class MapTourGuideService implements TourGuideService {
         return providersWithinUsersPriceRange;
     }
 
-    public VisitedLocation trackUserLocation(User user) {
-        /*CompletableFuture<VisitedLocation> visitedLocation = CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()));
-        CompletableFuture<User> userFuture = visitedLocation.thenCompose(visitedLocation -> CompletableFuture.supplyAsync(() -> user.addToVisitedLocations(visitedLocation)));
-        CompletableFuture<VisitedLocation> visitedLocation = userFuture.thenCompose(result2 -> CompletableFuture.supplyAsync(() -> rewardsService.calculateRewards(userFuture)));*/
-        CompletableFuture<VisitedLocation> visitedLocationCompletableFuture =
-                CompletableFuture.supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()))
-                        .thenCompose(visitedLocation ->
-                                CompletableFuture.supplyAsync(() ->
-                                        {
-                                            user.addToVisitedLocations(visitedLocation);
-                                            rewardsService.calculateRewards(user);
-                                            return visitedLocation;
-                                        }
-                                ));
-        /*VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);*/
-        return visitedLocationCompletableFuture.join();
+    public Future<VisitedLocation> trackUserLocation(User user) {
+        FutureTask<VisitedLocation> visitedLocationFutureTask =
+                new FutureTask<>(() -> gpsUtil.getUserLocation(user.getUserId()));
+        executorService.execute(() -> {
+            new Thread(visitedLocationFutureTask).start();
+            try {
+                user.addToVisitedLocations(visitedLocationFutureTask.get());
+                rewardsService.calculateRewards(user);
+            } catch (ExecutionException | InterruptedException e) {
+                log.error("An error occurred while adding reward to user {}", user.getUserName(), e);
+            }
+        });
+        //executorService.shutdown();
+        return visitedLocationFutureTask;
     }
 
     public List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation) {

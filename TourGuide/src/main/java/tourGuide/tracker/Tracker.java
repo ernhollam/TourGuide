@@ -8,6 +8,7 @@ import tourGuide.service.TourGuideService;
 import tourGuide.service.UserService;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -43,7 +44,13 @@ public class Tracker extends Thread {
             List<User> users = userService.getAllUsers();
             log.debug("Begin Tracker. Tracking " + users.size() + " users.");
             stopWatch.start();
-            users.forEach(tourGuideService::trackUserLocation);
+            users.parallelStream().forEach(user -> {
+                try {
+                    tourGuideService.trackUserLocation(user).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Error while tracking user {}", user, e);
+                }
+            });
             stopWatch.stop();
             log.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
             stopWatch.reset();
