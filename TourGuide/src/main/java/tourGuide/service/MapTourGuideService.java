@@ -93,7 +93,7 @@ public class MapTourGuideService implements TourGuideService {
             new Thread(visitedLocationFutureTask).start();
             try {
                 user.addToVisitedLocations(visitedLocationFutureTask.get());
-                rewardsService.calculateRewards(user);
+                rewardsService.calculateRewards(user).get();
             } catch (ExecutionException | InterruptedException e) {
                 log.error("An error occurred while adding reward to user {}", user.getUserName(), e);
             }

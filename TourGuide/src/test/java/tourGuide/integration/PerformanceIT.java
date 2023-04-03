@@ -49,7 +49,6 @@ public class PerformanceIT {
 
     RewardsService mapRewardsService;
     UserService    mapUserService;
-    TrackerService trackerService;
     private final GpsUtil               gpsUtil               = new GpsUtil();
     private       StopWatch             stopWatch;
     private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
@@ -65,7 +64,6 @@ public class PerformanceIT {
         mapUserService      = new MapUserService(testModeConfiguration);
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
-        trackerService = new TrackerService(mapTourGuideService, mapUserService);
     }
     //@Ignore
     @Test
@@ -74,7 +72,6 @@ public class PerformanceIT {
         List<User> allUsers = mapUserService.getAllUsers();
 
         stopWatch.start();
-
         allUsers.parallelStream().forEach((user) -> {
             try {
                 mapTourGuideService.trackUserLocation(user).get();
@@ -82,9 +79,14 @@ public class PerformanceIT {
                 throw new RuntimeException(e);
             }
         });
-
         stopWatch.stop();
-        trackerService.stopTracking();
+
+        // make sure each user has at least 4 visited locations
+        // (3 locations added during initialization and 1 during test)
+        allUsers
+                .parallelStream()
+                .forEach(user -> assertTrue(user.getVisitedLocations().size() >= 4));
+        // trackerService.stopTracking();
 
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
@@ -95,8 +97,7 @@ public class PerformanceIT {
     public void highVolumeGetRewards() {
         stopWatch.start();
 
-        trackerService = new TrackerService(mapTourGuideService, mapUserService);
-        // add first attraction to all test users
+        // add first attraction to all test users location
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers   = mapUserService.getAllUsers();
         allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
@@ -104,18 +105,17 @@ public class PerformanceIT {
         // use parallel stream to add rewards to users as it is used when calculateRewards is called
         allUsers.parallelStream().forEach(user -> {
             try {
-                mapRewardsService.calculateRewards(user);
+                mapRewardsService.calculateRewards(user).get();
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
+        stopWatch.stop();
 
         // make sure each user is rewarded for visiting the attraction
-        for (User user : allUsers) {
-            assertTrue(user.getUserRewards().size() > 0);
-        }
-        stopWatch.stop();
-        trackerService.stopTracking();
+        allUsers
+                .parallelStream()
+                .forEach(user -> assertTrue(user.getUserRewards().size() > 0));
 
         System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
