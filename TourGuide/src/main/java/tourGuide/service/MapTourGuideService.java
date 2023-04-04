@@ -24,9 +24,9 @@ public class MapTourGuideService implements TourGuideService {
     private final GpsUtil    gpsUtil;
     private final TripPricer tripPricer = new TripPricer();
 
-    private final RewardsService rewardsService;
+    private final RewardsService  rewardsService;
     private final UserService     userService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(500);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
 
     public MapTourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, UserService userService) {
@@ -86,20 +86,18 @@ public class MapTourGuideService implements TourGuideService {
         return providersWithinUsersPriceRange;
     }
 
-    public Future<VisitedLocation> trackUserLocation(User user) {
-        FutureTask<VisitedLocation> visitedLocationFutureTask =
-                new FutureTask<>(() -> gpsUtil.getUserLocation(user.getUserId()));
-        executorService.execute(() -> {
-            new Thread(visitedLocationFutureTask).start();
-            try {
-                user.addToVisitedLocations(visitedLocationFutureTask.get());
-                rewardsService.calculateRewards(user).get();
-            } catch (ExecutionException | InterruptedException e) {
-                log.error("An error occurred while adding reward to user {}", user.getUserName(), e);
-            }
-        });
-        //executorService.shutdown();
-        return visitedLocationFutureTask;
+    public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
+        return CompletableFuture
+                .supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()), executorService)
+                .thenApply(visitedLocation -> {
+                    try {
+                        user.addToVisitedLocations(visitedLocation);
+                        rewardsService.calculateRewards(user);
+                    } catch (ExecutionException | InterruptedException e) {
+                        log.error("An error occurred while adding reward to user {}", user.getUserName(), e);
+                    }
+                    return visitedLocation;
+                });
     }
 
     public List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation) {
