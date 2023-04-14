@@ -19,10 +19,10 @@ import java.util.concurrent.*;
 public class MapRewardsService implements RewardsService {
 
     // proximity in miles
-    private       int             proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
-    private final GpsUtil         gpsUtil;
-    private final RewardCentral   rewardsCentral;
-    ExecutorService executorService = Executors.newFixedThreadPool(500);
+    private       int           proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
+    private final GpsUtil       gpsUtil;
+    private final RewardCentral rewardsCentral;
+    ExecutorService executorService = Executors.newFixedThreadPool(100);
 
     public MapRewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil        = gpsUtil;
@@ -37,11 +37,11 @@ public class MapRewardsService implements RewardsService {
         proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     }
 
-    public CompletableFuture<?> calculateRewards(User user) {
+    public void calculateRewards(User user) throws ExecutionException, InterruptedException {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction>      attractions   = gpsUtil.getAttractions();
 
-       return CompletableFuture.runAsync(() -> {
+       CompletableFuture.runAsync(() -> {
             for (VisitedLocation visitedLocation : userLocations) {
                 for (Attraction attraction : attractions) {
                     if (nearAttraction(visitedLocation, attraction)) {
@@ -50,7 +50,7 @@ public class MapRewardsService implements RewardsService {
                     }
                 }
             }
-        }, executorService);
+        }, executorService).get();
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

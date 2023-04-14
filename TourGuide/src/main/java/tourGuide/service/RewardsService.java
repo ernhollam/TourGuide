@@ -4,13 +4,12 @@ import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import tourGuide.model.User;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public interface RewardsService {
     void setProximityBuffer(int proximityBuffer);
     void setDefaultProximityBuffer();
-    CompletableFuture<?> calculateRewards(User user) throws ExecutionException, InterruptedException;
+    void calculateRewards(User user) throws ExecutionException, InterruptedException;
     boolean isWithinAttractionProximity(Attraction attraction, Location location);
     int getRewardPoints(Attraction attraction, User user);
     double getDistance(Location loc1, Location loc2);
