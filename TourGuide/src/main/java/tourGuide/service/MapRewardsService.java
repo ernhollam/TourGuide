@@ -12,7 +12,9 @@ import tourGuide.model.User;
 import tourGuide.model.UserReward;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
@@ -37,7 +39,7 @@ public class MapRewardsService implements RewardsService {
         proximityBuffer = TourGuideConstants.DEFAULT_PROXIMITY_BUFFER;
     }
 
-    public void calculateRewards(User user) throws ExecutionException, InterruptedException {
+    public void calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction>      attractions   = gpsUtil.getAttractions();
 
@@ -50,7 +52,7 @@ public class MapRewardsService implements RewardsService {
                     }
                 }
             }
-        }, executorService).get();
+        }, executorService);
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

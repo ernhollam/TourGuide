@@ -14,8 +14,16 @@ import tourGuide.model.ViewModel.NearbyAttractionViewModel;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,9 +95,11 @@ public class MapTourGuideService implements TourGuideService {
     }
 
     public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
+        log.debug("Tracking user "+ user.getUserName());
         return CompletableFuture
                 .supplyAsync(() -> gpsUtil.getUserLocation(user.getUserId()), executorService)
                 .thenApply(visitedLocation -> {
+                    log.debug("Updating user "+ user.getUserName());
                     try {
                         user.addToVisitedLocations(visitedLocation);
                         rewardsService.calculateRewards(user);

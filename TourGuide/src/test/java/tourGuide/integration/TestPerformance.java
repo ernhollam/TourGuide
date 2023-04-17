@@ -11,79 +11,63 @@ import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
-import tourGuide.service.*;
+import tourGuide.service.MapRewardsService;
+import tourGuide.service.MapTourGuideService;
+import tourGuide.service.MapUserService;
+import tourGuide.service.RewardsService;
+import tourGuide.service.TourGuideService;
+import tourGuide.service.TrackerService;
+import tourGuide.service.UserService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 public class TestPerformance {
 
-    /*
-     * A note on performance improvements:
-     *
-     *     The number of users generated for the high volume tests can be easily adjusted via this method:
-     *
-     *     		InternalTestHelper.setInternalUserNumber(100000);
-     *
-     *
-     *     These tests can be modified to suit new solutions, just as long as the performance metrics
-     *     at the end of the tests remains consistent.
-     *
-     *     These are performance metrics that we are trying to hit:
-     *
-     *     highVolumeTrackLocation: 100,000 users within 15 minutes:
-     *     		assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-     *
-     *     highVolumeGetRewards: 100,000 users within 20 minutes:
-     *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-     */
     TourGuideService mapTourGuideService;
-
     RewardsService mapRewardsService;
-    UserService    mapUserService;
-    private final GpsUtil               gpsUtil               = new GpsUtil();
-    private       StopWatch             stopWatch;
+    UserService mapUserService;
+    private final GpsUtil gpsUtil = new GpsUtil();
+
     @Before
     public void setUp() {
         Locale.setDefault(Locale.US);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(1000);
-        stopWatch = new StopWatch();
-
-        // set up services
+        InternalTestHelper.setInternalUserNumber(50000);
+        mapUserService = new MapUserService();
         mapRewardsService = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapUserService      = new MapUserService();
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
-
     }
+
     //@Ignore
     @Test
-    public void highVolumeTrackLocation() {
+    public void highVolumeTrackLocation() throws InterruptedException {
+        // begin tracking
+        TrackerService trackerService = new TrackerService(mapTourGuideService, mapUserService);
 
         List<User> allUsers = mapUserService.getAllUsers();
-
+        List<UUID> locatedUsers = new ArrayList<>();
+        StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        allUsers.parallelStream().forEach((user) -> {
-            try {
-                mapTourGuideService.trackUserLocation(user).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+        while (locatedUsers.size() < allUsers.size()) {
+            for (User user : allUsers) {
+                if (!locatedUsers.contains(user.getUserId()) && user.getVisitedLocations().size() > 3) {
+                    locatedUsers.add(user.getUserId());
+                }
             }
-        });
+            TimeUnit.MILLISECONDS.sleep(200);
+        }
+        assertEquals(locatedUsers.size(), allUsers.size());
         stopWatch.stop();
-
-        // make sure each user has at least 4 visited locations
-        // (3 locations added during initialization and 1 during test)
-        allUsers
-                .parallelStream()
-                .forEach(user -> assertTrue(user.getVisitedLocations().size() >= 4));
-        // trackerService.stopTracking();
+        trackerService.stopTracking();
 
         System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
@@ -91,29 +75,31 @@ public class TestPerformance {
 
     //@Ignore
     @Test
-    public void highVolumeGetRewards() {// add first attraction to all test users location
+    public void highVolumeGetRewards() throws InterruptedException {
+        StopWatch stopWatch = new StopWatch();
+
         Attraction attraction = gpsUtil.getAttractions().get(0);
-        List<User> allUsers   = mapUserService.getAllUsers();
-        allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
+        List<User> allUsers = mapUserService.getAllUsers();
+        List<UUID> rewardedUsers = new ArrayList<>();
+        allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
         stopWatch.start();
-        // use parallel stream to add rewards to users as it is used when calculateRewards is called
-        allUsers.parallelStream().forEach(user -> {
-            try {
-                mapRewardsService.calculateRewards(user);
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
+        // begin tracking
+        TrackerService trackerService = new TrackerService(mapTourGuideService, mapUserService);
+        while (rewardedUsers.size() < allUsers.size()) {
+            for (User user : allUsers) {
+                if (!rewardedUsers.contains(user.getUserId()) && user.getUserRewards().size() > 0) {
+                    rewardedUsers.add(user.getUserId());
+                }
             }
-        });
-        stopWatch.stop();
+            TimeUnit.MILLISECONDS.sleep(200);
+        }
 
-        // make sure each user is rewarded for visiting the attraction
-        allUsers
-                .parallelStream()
-                .forEach(user -> assertTrue(user.getUserRewards().size() > 0));
+        assertEquals(rewardedUsers.size(), allUsers.size());
+        stopWatch.stop();
+        trackerService.stopTracking();
 
         System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
-
 }
