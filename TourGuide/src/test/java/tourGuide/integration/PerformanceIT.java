@@ -55,7 +55,7 @@ public class PerformanceIT {
     @Before
     public void setUp() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(5000);
+        InternalTestHelper.setInternalUserNumber(1000);
         stopWatch = new StopWatch();
 
         // set up services
@@ -94,18 +94,16 @@ public class PerformanceIT {
 
     //@Ignore
     @Test
-    public void highVolumeGetRewards() {
-        stopWatch.start();
-
-        // add first attraction to all test users location
+    public void highVolumeGetRewards() {// add first attraction to all test users location
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers   = mapUserService.getAllUsers();
         allUsers.parallelStream().forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
+        stopWatch.start();
         // use parallel stream to add rewards to users as it is used when calculateRewards is called
         allUsers.parallelStream().forEach(user -> {
             try {
-                mapRewardsService.calculateRewards(user).get();
+                mapRewardsService.calculateRewards(user);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }

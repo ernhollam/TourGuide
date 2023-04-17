@@ -71,7 +71,7 @@ public class MapRewardsServiceIT {
         trackerService = new TrackerService(mapTourGuideService, nearAllAttractionsUserService);
         mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
         // WHEN calculating the rewards for the test user
-        mapRewardsService.calculateRewards(nearAllAttractionsUserService.getAllUsers().get(0)).get();
+        mapRewardsService.calculateRewards(nearAllAttractionsUserService.getAllUsers().get(0));
         List<UserReward> userRewards = mapTourGuideService.getUserRewards(mapUserService.getAllUsers().get(0));
         trackerService.stopTracking();
         //THEN user must have rewards for all attractions
