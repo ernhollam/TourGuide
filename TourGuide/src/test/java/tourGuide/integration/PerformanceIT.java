@@ -7,10 +7,8 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
-import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.service.*;
@@ -23,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@Import(TestModeConfiguration.class)
 public class PerformanceIT {
 
     /*
@@ -51,7 +48,6 @@ public class PerformanceIT {
     UserService    mapUserService;
     private final GpsUtil               gpsUtil               = new GpsUtil();
     private       StopWatch             stopWatch;
-    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     @Before
     public void setUp() {
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
@@ -60,8 +56,7 @@ public class PerformanceIT {
 
         // set up services
         mapRewardsService = new MapRewardsService(gpsUtil, new RewardCentral());
-        testModeConfiguration.setTestMode(true);
-        mapUserService      = new MapUserService(testModeConfiguration);
+        mapUserService      = new MapUserService();
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
     }

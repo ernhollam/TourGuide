@@ -2,7 +2,6 @@ package tourGuide.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.util.LocationUtil;
@@ -15,9 +14,10 @@ import java.util.stream.IntStream;
 public class MapUserService implements UserService {
     // Database connection will be used for external users, but for testing purposes internal users are provided and stored in memory
     private final Map<String, User> internalUserMap = new HashMap<>();
+    private boolean testMode = true;
 
-    public MapUserService(TestModeConfiguration testModeConfiguration) {
-        if (testModeConfiguration.isTestMode()) {
+    public MapUserService() {
+        if (testMode) {
             log.info("TestMode enabled");
             log.debug("Initializing users");
             initializeInternalUsers();

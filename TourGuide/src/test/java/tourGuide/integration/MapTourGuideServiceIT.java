@@ -6,10 +6,8 @@ import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
-import tourGuide.config.TestModeConfiguration;
 import tourGuide.constants.TourGuideConstants;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
@@ -26,7 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@Import(TestModeConfiguration.class)
 public class MapTourGuideServiceIT {
 
     /**
@@ -38,7 +35,6 @@ public class MapTourGuideServiceIT {
     UserService    mapUserService;
     TrackerService trackerService;
     private final GpsUtil               gpsUtil               = new GpsUtil();
-    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
 
     User            user;
     User            user2;
@@ -52,7 +48,7 @@ public class MapTourGuideServiceIT {
         InternalTestHelper.setInternalUserNumber(0);
         // set up services
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapUserService      = new MapUserService(testModeConfiguration);
+        mapUserService      = new MapUserService();
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
         trackerService = new TrackerService(mapTourGuideService, mapUserService);

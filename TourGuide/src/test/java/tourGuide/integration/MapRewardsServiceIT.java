@@ -6,10 +6,8 @@ import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import rewardCentral.RewardCentral;
-import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.model.UserReward;
@@ -24,10 +22,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@Import(TestModeConfiguration.class)
 public class MapRewardsServiceIT {
     private final GpsUtil               gpsUtil               = new GpsUtil();
-    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     RewardsService   mapRewardsService;
     UserService      mapUserService;
     TourGuideService mapTourGuideService;
@@ -36,7 +32,7 @@ public class MapRewardsServiceIT {
     @Before
     public void setServices() {
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapUserService      = new MapUserService(testModeConfiguration);
+        mapUserService      = new MapUserService();
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
     }
 
@@ -67,7 +63,7 @@ public class MapRewardsServiceIT {
     public void nearAllAttractions() throws ExecutionException, InterruptedException {
         // GIVEN a test user and setting proximity to maximal value
         InternalTestHelper.setInternalUserNumber(1);
-        MapUserService nearAllAttractionsUserService = new MapUserService(testModeConfiguration);
+        MapUserService nearAllAttractionsUserService = new MapUserService();
         trackerService = new TrackerService(mapTourGuideService, nearAllAttractionsUserService);
         mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
         // WHEN calculating the rewards for the test user

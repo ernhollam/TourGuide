@@ -3,9 +3,7 @@ package tourGuide.integration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import tourGuide.config.TestModeConfiguration;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.service.MapUserService;
@@ -18,11 +16,9 @@ import static org.junit.Assert.assertTrue;
 
 
 @RunWith(SpringRunner.class)
-@Import(TestModeConfiguration.class)
 public class MapUserServiceIT {
 
     MapUserService userService;
-    private final TestModeConfiguration testModeConfiguration = new TestModeConfiguration();
     private User user;
     private User user2;
 
@@ -30,7 +26,7 @@ public class MapUserServiceIT {
     public void setUp(){
         // reset internal user number
         InternalTestHelper.setInternalUserNumber(0);
-        userService = new MapUserService(testModeConfiguration);
+        userService = new MapUserService();
 
         // GIVEN two users added
         user  = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
