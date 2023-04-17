@@ -100,16 +100,6 @@ public class MapTourGuideService implements TourGuideService {
                 });
     }
 
-    public List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation) {
-        List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
-            if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-                nearbyAttractions.add(attraction);
-            }
-        }
-        return nearbyAttractions;
-    }
-
     /**
      * Get the closest tourist attractions to the user - no matter how far away they are.
      *

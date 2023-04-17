@@ -15,13 +15,14 @@ import tourGuide.service.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-public class PerformanceIT {
+public class TestPerformance {
 
     /*
      * A note on performance improvements:
@@ -50,6 +51,7 @@ public class PerformanceIT {
     private       StopWatch             stopWatch;
     @Before
     public void setUp() {
+        Locale.setDefault(Locale.US);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
         InternalTestHelper.setInternalUserNumber(1000);
         stopWatch = new StopWatch();

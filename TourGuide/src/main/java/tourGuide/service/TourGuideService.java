@@ -1,6 +1,5 @@
 package tourGuide.service;
 
-import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import tourGuide.model.User;
@@ -20,7 +19,6 @@ public interface TourGuideService {
     VisitedLocation getUserLocation(User user) throws ExecutionException, InterruptedException;
     List<Provider> getTripDeals(User user);
     CompletableFuture<VisitedLocation> trackUserLocation(User user) throws ExecutionException, InterruptedException;
-    List<Attraction> getAttractionsWithinProximityRange(VisitedLocation visitedLocation);
     List<NearbyAttractionViewModel> getNearByAttractions(User user) throws ExecutionException, InterruptedException;
     Map<UUID, Location> getAllCurrentLocations() throws ExecutionException, InterruptedException;
 }

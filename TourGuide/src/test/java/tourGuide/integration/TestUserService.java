@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 
 @RunWith(SpringRunner.class)
-public class MapUserServiceIT {
+public class TestUserService {
 
     MapUserService userService;
     private User user;

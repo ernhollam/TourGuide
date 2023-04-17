@@ -16,6 +16,7 @@ import tourGuide.service.*;
 import tripPricer.Provider;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-public class MapTourGuideServiceIT {
+public class TestTourGuideService {
 
     /**
      * Class under test.
@@ -43,7 +44,8 @@ public class MapTourGuideServiceIT {
 
 
     @Before
-    public void setServices() throws ExecutionException, InterruptedException {
+    public void setUp() throws ExecutionException, InterruptedException {
+        Locale.setDefault(Locale.US);
         // reset number of test users
         InternalTestHelper.setInternalUserNumber(0);
         // set up services
@@ -73,11 +75,6 @@ public class MapTourGuideServiceIT {
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
 
-    @Test
-    public void getAttractionsWithinProximityRange() {
-        // TODO set proximity buffer to max value, get 1st attraction and set visitedLocation to attraction's location, attraction must be nearby visitedLocation
-
-    }
     // @Ignore // Not yet implemented
     @Test
     public void getNearByAttractions() throws ExecutionException, InterruptedException {

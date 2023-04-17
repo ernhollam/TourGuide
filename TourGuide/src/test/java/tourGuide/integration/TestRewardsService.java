@@ -15,6 +15,7 @@ import tourGuide.service.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-public class MapRewardsServiceIT {
+public class TestRewardsService {
     private final GpsUtil               gpsUtil               = new GpsUtil();
     RewardsService   mapRewardsService;
     UserService      mapUserService;
@@ -30,7 +31,8 @@ public class MapRewardsServiceIT {
     TrackerService   trackerService;
 
     @Before
-    public void setServices() {
+    public void setUp() {
+        Locale.setDefault(Locale.US);
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
         mapUserService      = new MapUserService();
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
