@@ -48,6 +48,9 @@ public class MapRewardsService implements RewardsService {
                 for (Attraction attraction : attractions) {
                     if (nearAttraction(visitedLocation, attraction)) {
                         // and is currently near this attraction, add the reward for this attraction to this user
+                        log.debug("Adding a reward for user {} for visiting attraction {} ({}:{}) because they were located at ({}:{})",
+                                user.getUserName(), attraction.attractionName, attraction.longitude, attraction.latitude,
+                                visitedLocation.location.longitude, visitedLocation.location.latitude);
                         user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
                     }
                 }

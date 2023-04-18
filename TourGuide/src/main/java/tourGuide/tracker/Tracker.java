@@ -48,7 +48,7 @@ public class Tracker extends Thread {
                 try {
                     tourGuideService.trackUserLocation(user).get();
                 } catch (InterruptedException | ExecutionException e) {
-                    log.error("Error while tracking user {}", user, e);
+                    log.error("Error while tracking user {}", user.getUserName(), e);
                 }
             });
             stopWatch.stop();
