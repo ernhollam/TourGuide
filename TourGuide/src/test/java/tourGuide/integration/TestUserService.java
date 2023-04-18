@@ -26,7 +26,7 @@ public class TestUserService {
     public void setUp(){
         // reset internal user number
         InternalTestHelper.setInternalUserNumber(0);
-        userService = new MapUserService();
+        userService = new MapUserService(false);
 
         // GIVEN two users added
         user  = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -50,5 +50,10 @@ public class TestUserService {
 
         assertEquals(user, retrievedUser);
         assertEquals(user2, retrievedUser2);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void addUserWhoAlreadyExistsThrowsException() {
+        userService.addUser(user);
     }
 }
