@@ -12,7 +12,13 @@ import tourGuide.constants.TourGuideConstants;
 import tourGuide.helper.InternalTestHelper;
 import tourGuide.model.User;
 import tourGuide.model.ViewModel.NearbyAttractionViewModel;
-import tourGuide.service.*;
+import tourGuide.service.MapRewardsService;
+import tourGuide.service.MapTourGuideService;
+import tourGuide.service.MapUserService;
+import tourGuide.service.RewardsService;
+import tourGuide.service.TourGuideService;
+import tourGuide.service.TrackerService;
+import tourGuide.service.UserService;
 import tripPricer.Provider;
 
 import java.util.List;
@@ -50,7 +56,7 @@ public class TestTourGuideService {
         InternalTestHelper.setInternalUserNumber(0);
         // set up services
         mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
-        mapUserService      = new MapUserService();
+        mapUserService      = new MapUserService(false);
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 
         trackerService = new TrackerService(mapTourGuideService, mapUserService);
@@ -64,9 +70,10 @@ public class TestTourGuideService {
     }
 
     @Test
-    public void getUserLocation() {
-        trackerService.stopTracking();
-        assertEquals(visitedLocation.userId, user.getUserId());
+    public void getUserLocationWithAVisitedLocation() throws ExecutionException, InterruptedException {
+        user.addToVisitedLocations(visitedLocation2);
+        VisitedLocation actual = mapTourGuideService.getUserLocation(user);
+        assertEquals(actual, visitedLocation2);
     }
 
     @Test
@@ -75,7 +82,6 @@ public class TestTourGuideService {
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
 
-    // @Ignore // Not yet implemented
     @Test
     public void getNearByAttractions() throws ExecutionException, InterruptedException {
         List<NearbyAttractionViewModel> nearByAttractions = mapTourGuideService.getNearByAttractions(user);
