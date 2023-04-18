@@ -33,29 +33,28 @@ import static org.junit.Assert.assertTrue;
 public class TestPerformance {
 
     TourGuideService mapTourGuideService;
-    RewardsService mapRewardsService;
-    UserService mapUserService;
+    RewardsService   mapRewardsService;
+    UserService      mapUserService;
     private final GpsUtil gpsUtil = new GpsUtil();
 
     @Before
     public void setUp() {
         Locale.setDefault(Locale.US);
         // Users should be incremented up to 100,000, and test finishes within 15 minutes
-        InternalTestHelper.setInternalUserNumber(50000);
-        mapUserService = new MapUserService();
-        mapRewardsService = new MapRewardsService(gpsUtil, new RewardCentral());
+        InternalTestHelper.setInternalUserNumber(100);
+        mapUserService      = new MapUserService(true);
+        mapRewardsService   = new MapRewardsService(gpsUtil, new RewardCentral());
         mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
     }
 
-    //@Ignore
     @Test
     public void highVolumeTrackLocation() throws InterruptedException {
         // begin tracking
         TrackerService trackerService = new TrackerService(mapTourGuideService, mapUserService);
 
-        List<User> allUsers = mapUserService.getAllUsers();
+        List<User> allUsers     = mapUserService.getAllUsers();
         List<UUID> locatedUsers = new ArrayList<>();
-        StopWatch stopWatch = new StopWatch();
+        StopWatch  stopWatch    = new StopWatch();
         stopWatch.start();
         while (locatedUsers.size() < allUsers.size()) {
             for (User user : allUsers) {
@@ -69,17 +68,18 @@ public class TestPerformance {
         stopWatch.stop();
         trackerService.stopTracking();
 
-        System.out.println("highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+        System.out.println(
+                "highVolumeTrackLocation: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime())
+                        + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
-    //@Ignore
     @Test
     public void highVolumeGetRewards() throws InterruptedException {
         StopWatch stopWatch = new StopWatch();
 
-        Attraction attraction = gpsUtil.getAttractions().get(0);
-        List<User> allUsers = mapUserService.getAllUsers();
+        Attraction attraction    = gpsUtil.getAttractions().get(0);
+        List<User> allUsers      = mapUserService.getAllUsers();
         List<UUID> rewardedUsers = new ArrayList<>();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
@@ -99,7 +99,8 @@ public class TestPerformance {
         stopWatch.stop();
         trackerService.stopTracking();
 
-        System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+        System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime())
+                + " seconds.");
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 }
