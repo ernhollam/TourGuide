@@ -10,31 +10,31 @@ import java.util.concurrent.Executors;
 @Service
 @Slf4j
 public class TrackerService {
-    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
-    private final TourGuideService tourGuideService;
+	private final TourGuideService tourGuideService;
 
-    final UserService userService;
+	final UserService userService;
 
-    private Tracker tracker;
+	private final Tracker tracker;
 
-    public TrackerService(TourGuideService tourGuideService, UserService userService) {
-        this.tourGuideService = tourGuideService;
-        this.userService      = userService;
-        tracker               = new Tracker(tourGuideService, userService);
-        executorService.submit(tracker);
-        addShutDownHook();
-    }
+	public TrackerService(TourGuideService tourGuideService, UserService userService) {
+		this.tourGuideService = tourGuideService;
+		this.userService      = userService;
+		tracker               = new Tracker(tourGuideService, userService);
+		executorService.submit(tracker);
+		addShutDownHook();
+	}
 
-    /**
-     * Assures to shut down the Tracker thread
-     */
-    public void stopTracking() {
-        tracker.stopTracking();
-        executorService.shutdownNow();
-    }
+	/**
+	 * Assures to shut down the Tracker thread
+	 */
+	public void stopTracking() {
+		tracker.stopTracking();
+		executorService.shutdownNow();
+	}
 
-    private void addShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(tracker::stopTracking));
-    }
+	private void addShutDownHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(tracker::stopTracking));
+	}
 }
