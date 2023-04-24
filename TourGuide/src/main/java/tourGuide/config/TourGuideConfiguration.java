@@ -7,15 +7,14 @@ import rewardCentral.RewardCentral;
 
 @Configuration
 public class TourGuideConfiguration {
-	
+
 	@Bean
 	public GpsUtil getGpsUtil() {
 		return new GpsUtil();
 	}
-	
+
 	@Bean
 	public RewardCentral getRewardCentral() {
 		return new RewardCentral();
 	}
-	
 }

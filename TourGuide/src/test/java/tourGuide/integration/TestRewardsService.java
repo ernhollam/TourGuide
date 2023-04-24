@@ -29,9 +29,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 public class TestRewardsService {
 	private final GpsUtil gpsUtil = new GpsUtil();
-	RewardsService mapRewardsService;
+	RewardsService   mapRewardsService;
 	TourGuideService mapTourGuideService;
-	UserService mapUserService;
+	UserService      mapUserService;
 
 	@Before
 	public void setUp() {
@@ -43,10 +43,10 @@ public class TestRewardsService {
 	@Test
 	public void userGetRewards() throws InterruptedException {
 		InternalTestHelper.setInternalUserNumber(1);
-		mapUserService = new MapUserService(true);
+		mapUserService      = new MapUserService(true);
 		mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 		TrackerService trackerService = new TrackerService(mapTourGuideService, mapUserService);
-		User testUser = mapUserService.getAllUsers().get(0);
+		User           testUser       = mapUserService.getAllUsers().get(0);
 		testUser.clearVisitedLocations();
 		testUser.addToVisitedLocations(
 				new VisitedLocation(testUser.getUserId(), gpsUtil.getAttractions().get(0), new Date()));
@@ -69,11 +69,11 @@ public class TestRewardsService {
 		mapRewardsService.setProximityBuffer(Integer.MAX_VALUE);
 
 		InternalTestHelper.setInternalUserNumber(1);
-		mapUserService = new MapUserService(true);
+		mapUserService      = new MapUserService(true);
 		mapTourGuideService = new MapTourGuideService(gpsUtil, mapRewardsService, mapUserService);
 		// WHEN tracker started
 		TrackerService trackerService = new TrackerService(mapTourGuideService, mapUserService);
-		User testUser = mapUserService.getAllUsers().get(0);
+		User           testUser       = mapUserService.getAllUsers().get(0);
 		while (mapTourGuideService.getUserRewards(testUser).size() < gpsUtil.getAttractions().size()) {
 			TimeUnit.MILLISECONDS.sleep(200);
 		}

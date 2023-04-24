@@ -32,6 +32,7 @@ public class TourGuideController {
 	 * Returns current location for a user
 	 *
 	 * @param userName username of user for which the location is wanted
+	 *
 	 * @return user's location
 	 */
 	@RequestMapping("/getLocation")
@@ -57,6 +58,7 @@ public class TourGuideController {
 	 * Returns user rewards.
 	 *
 	 * @param userName username of user to find rewards
+	 *
 	 * @return list of user's rewards
 	 */
 	@RequestMapping("/getRewards")
@@ -88,6 +90,7 @@ public class TourGuideController {
 	 * Gets trip recommendations for user.
 	 *
 	 * @param userName username of user to find recommendations for
+	 *
 	 * @return a list of providers corresponding to user's preferences
 	 */
 	@RequestMapping("/getTripDeals")
@@ -100,6 +103,7 @@ public class TourGuideController {
 	 * Finds user by its username.
 	 *
 	 * @param userName username of user to find
+	 *
 	 * @return a user if exists
 	 */
 	private User getUser(String userName) {
